@@ -5,6 +5,7 @@ from termcolor import colored
 import requests
 #from urllib3.request import urlretrieve
 
+
 #create new s3 Bucket with timestamp as UID
 def createBucket(bucketName):
     s3 = boto3.resource("s3")
@@ -17,7 +18,9 @@ def createBucket(bucketName):
         
 
 def pullImageFromURL(url):
-    try:
-        requests.get(url,'local_image.jpg')
-    except FileNotFoundError as error:
-        print(error)
+    r = requests.get(url, allow_redirects=True)
+    open('resource.jpg', 'wb').write(r.content)
+    # try:
+    #     requests.get(url,'image-' + fileName + '.jpg')
+    # except FileNotFoundError as error:
+    #     print(error)

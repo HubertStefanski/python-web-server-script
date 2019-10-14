@@ -35,7 +35,7 @@ except IndexError:
 def checkConnectionToResource(url):
     reqUrl = url
     
-    def sendRequest(reqUrl,timeout=5):
+    def sendRequest(reqUrl,timeout=20):
         try:
             _ = requests.get(reqUrl,timeout=timeout)
             return True
