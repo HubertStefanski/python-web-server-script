@@ -57,7 +57,10 @@ checkConnectionToResource('http://google.com/')
 checkConnectionToResource(resourceURL)
 createBucket(timestamp)
 print(colored('Pulling image down from : ' + resourceURL,'cyan'))
-pullImageFromURL(resourceURL)
+pullImageFromURL(resourceURL,timestamp)
+print(colored('Putting image to Bucket','cyan'))
+
+putImageToBucket('resource - ' + timestamp + '.jpg','web-server-bucket-' + timestamp)
 
 
 # Call instance handler to create new instance and run http server

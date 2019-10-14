@@ -17,10 +17,19 @@ def createBucket(bucketName):
         print (colored(error,'red'))
         
 
-def pullImageFromURL(url):
+def pullImageFromURL(url,timestamp):
     r = requests.get(url, allow_redirects=True)
-    open('resource.jpg', 'wb').write(r.content)
-    # try:
-    #     requests.get(url,'image-' + fileName + '.jpg')
-    # except FileNotFoundError as error:
-    #     print(error)
+    open('resource - '+ timestamp + '.jpg', 'wb').write(r.content)
+
+def putImageToBucket(fileName,bucketName,object_name = None):
+
+    if object_name is None:
+        object_name = fileName
+
+    s3 = boto3.client('s3')
+    try:
+        response = s3.client.upload_file(fileName,bucketName,object_name)
+    except Exception as error:
+        print(colored(error),'red')
+        return False
+    return True
