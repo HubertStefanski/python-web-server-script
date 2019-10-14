@@ -59,8 +59,9 @@ createBucket(timestamp)
 print(colored('Pulling image down from : ' + resourceURL,'cyan'))
 pullImageFromURL(resourceURL,timestamp)
 print(colored('Putting image to Bucket','cyan'))
-
-putImageToBucket('resource - ' + timestamp + '.jpg','web-server-bucket-' + timestamp)
+# wait for bucket to setup, avoid putting to non-existent bucket
+time.sleep(10)
+putImageToBucket('web-server-bucket-' + timestamp,'resource-' + timestamp + '.jpg')
 
 
 # Call instance handler to create new instance and run http server
