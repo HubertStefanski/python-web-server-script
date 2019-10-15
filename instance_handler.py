@@ -24,7 +24,6 @@ def createEC2Instance():
              sudo yum install httpd -y
              sudo systemctl enable httpd
              sudo service httpd start
-             sudo touch /var/www/html/index.html
              """
     )
     # give the user feedback creation
