@@ -29,3 +29,7 @@ def putImageToBucket(bucketName,fileName):
         print(response)
     except Exception as error:
         print(error)
+
+def getResourceBucketURL(timestamp):
+    print(colored('s3://web-server-bucket-'+ timestamp +'/resource-' + timestamp +'.jpg','red',attrs=['bold']))
+    return 's3://web-server-bucket-'+ timestamp +'/resource-' + timestamp +'.jpg'

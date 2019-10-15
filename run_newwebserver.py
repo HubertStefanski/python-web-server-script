@@ -11,9 +11,10 @@ import re
 # library to accept command line arguments
 import sys
 
-# Import instance and bucket handlers 
+# Import instance, bucket and ssh handlers 
 import instance_handler
 from bucket_handler import *
+import ssh_handler
 
 # Import for feedback highlighting
 from termcolor import colored
@@ -23,6 +24,8 @@ import time
 
 # Create a timestamp to give UID to each component
 timestamp = time.strftime("%Y%m%d-%H%M")
+
+instIP = ''
 
 # Set Url var to argument from command else
 try:
@@ -59,10 +62,19 @@ createBucket(timestamp)
 print(colored('Pulling image down from : ' + resourceURL,'cyan'))
 pullImageFromURL(resourceURL,timestamp)
 print(colored('Putting image to Bucket','cyan'))
+
 # wait for bucket to setup, avoid putting to non-existent bucket
 time.sleep(10)
+
 putImageToBucket('web-server-bucket-' + timestamp,'resource-' + timestamp + '.jpg')
 
 
 # Call instance handler to create new instance and run http server
 instance_handler.createEC2Instance()
+for i in  instance_handler.ec2.instances.all():
+    instList = [i.public_ip_address]
+    # instanceIP = instList[-1]
+    instIP = str(instList[-1])
+    print(instIP)
+
+ssh_handler.startSSHConnection(instIP)

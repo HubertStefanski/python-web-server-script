@@ -4,11 +4,11 @@ import sys
 # coloured output for important information to stand out
 from termcolor import colored
 
+ec2 = boto3.resource('ec2', region_name='eu-west-1')
 
 
 
 def createEC2Instance():
-    ec2 = boto3.resource('ec2', region_name='eu-west-1')
     instance = ec2.create_instances(
         ImageId='ami-0ce71448843cb18a1',
         MinCount=1,
@@ -24,6 +24,7 @@ def createEC2Instance():
              sudo yum install httpd -y
              sudo systemctl enable httpd
              sudo service httpd start
+             sudo touch /var/www/html/index.html
              """
     )
     # give the user feedback creation
@@ -43,3 +44,5 @@ def createEC2Instance():
                   instance[0].public_ip_address, 'yellow'))
     print(colored(">>>Instance is up, HTTP Server should be available shortly",
                   'yellow', attrs=['bold']))
+
+
