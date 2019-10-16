@@ -11,15 +11,15 @@ def createBucket(bucketName):
     s3 = boto3.resource("s3")
     print(colored('Creating new Bucket','blue'))
     try:
-        response = s3.create_bucket(Bucket='web-server-bucket-' + bucketName, CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
+        response = s3.create_bucket(Bucket=bucketName, CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
         print (colored(response, 'yellow'))
     except Exception as error:
         print (colored(error,'red'))
         
 
-def pullImageFromURL(url,timestamp):
+def pullImageFromURL(url,fileName):
     r = requests.get(url, allow_redirects=True)
-    open('resource-'+ timestamp + '.jpg', 'wb').write(r.content)
+    open(fileName, 'wb').write(r.content)
 
 def putImageToBucket(bucketName,fileName):
     s3 = boto3.resource('s3')

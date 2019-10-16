@@ -78,9 +78,9 @@ checkConnectionToResource('http://google.com/')
 
 # Call bucket handler to create new Bucket
 checkConnectionToResource(resourceURL)
-createBucket(timestamp)
+createBucket('web-server-bucket-' + timestamp)
 print(colored('Pulling image down from : ' + resourceURL, 'cyan'))
-pullImageFromURL(resourceURL, timestamp)
+pullImageFromURL(resourceURL, 'resource-'+ timestamp + '.jpg')
 print(colored('Putting image to Bucket', 'cyan'))
 
 # wait for bucket to setup, avoid putting to non-existent bucket
@@ -100,4 +100,4 @@ for i in instance_handler.ec2.instances.all():
 
 waitForResource('http://'+instIP)
 print(colored('running ssh connection','blue'))
-ssh_handler.startSSHConnection(instIP,resourceURL )
+ssh_handler.startSSHConnection('ec2-user',instIP,resourceURL,'new_web_server_key.pem' )
