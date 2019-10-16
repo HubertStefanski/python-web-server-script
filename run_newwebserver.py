@@ -25,11 +25,13 @@ import time
 # Create a timestamp to give UID to each component
 timestamp = time.strftime("%Y%m%d-%H%M")
 
+# Variables
+
 instIP = ''
 keyName = 'new_web_server_key'
 bucketName = 'web-server-bucket-' + timestamp
 resourceName = 'resource-' + timestamp + '.jpg'
-resourceS3URL = 's3://web-server-bucket-' + timestamp + '/resource-' + timestamp + '.jpg'
+resourceS3URL = 'https://s3-eu-west-1.amazonaws.com/'+ bucketName +'/'+ resourceName
 userName = 'ec2-user'
 
 
@@ -62,7 +64,7 @@ def checkConnectionToResource(url):
         print(colored('Quiting System', 'magenta'))
         sys.exit(0)
 
-def waitForResource(url):
+def WaitForConnection(url):
     reqUrl = url
     def sendRequest(reqUrl, timeout=5):
         try:
@@ -73,7 +75,7 @@ def waitForResource(url):
     if(sendRequest(reqUrl) == False):
         print(colored('Waiting for resource to become available','magenta'))
         time.sleep(5)
-        waitForResource(url)
+        WaitForConnection(url)
     if(sendRequest(reqUrl) == True):
         print(colored('Connection to resource gained','green'))
 
@@ -85,13 +87,9 @@ checkConnectionToResource(resourceURL)
 createBucket(bucketName)
 print(colored('Pulling image down from : ' + resourceURL, 'cyan'))
 pullImageFromURL(resourceURL, resourceName)
-print(colored('Putting image to Bucket', 'cyan'))
+print(colored('Putting image to Bucket : ' + bucketName, 'cyan'))
 
-# wait for bucket to setup, avoid putting to non-existent bucket
-time.sleep(10)
-
-putImageToBucket(bucketName,
-                 resourceName)
+putImageToBucket(bucketName,resourceName,None)
 
 
 # Call instance handler to create new instance and run http server
@@ -104,6 +102,11 @@ for i in instance_handler.ec2.instances.all():
 
 instanceHTTP = 'http://'+instIP
 
-waitForResource(instanceHTTP)
+WaitForConnection(instanceHTTP)
 print(colored('running ssh connection','blue'))
-ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem' )
+ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem','''
+        sudo touch /var/www/html/index.html
+        sudo chown ec2-user /var/www/html/index.html
+        sudo echo '<img src ="''' + resourceS3URL + '''" alt = "resourcePicture">' >> /var/www/html/index.html
+        exit
+        ''' )

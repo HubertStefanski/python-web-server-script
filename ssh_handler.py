@@ -8,29 +8,24 @@ import paramiko
 
 
 
-def startSSHConnection(username,instanceIP, resourceName,keyName):
+def startSSHConnection(username,instanceIP, resourceName,keyName,commandIssued):
     ssh = paramiko.SSHClient()
     try:
         ssh.load_system_host_keys()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(instanceIP,username=username,key_filename=keyName)        
-        ssh = client.invoke_shell()
+        ssh = ssh.invoke_shell()
         stdin = ssh.makefile('wb')
         stdout = ssh.makefile('rb')
-        stdin.write('''
-        y
-        sudo echo '<h1>this is a heading</h1>' > /var/h
-        exit
-        ''')
+        stdin.write(commandIssued)
         print(stdout.read())
         stdout.close()
         stdin.close()
-        client.close()
 
         #ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('sudo echo <h1>Welcome to your new web server</h1><p><img src=' +resourceName+' /></p>' '> /var/html/index.html')
 
     except Exception as err:
         return err
         print(err)
-    
+
     ssh.close()
