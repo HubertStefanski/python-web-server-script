@@ -27,7 +27,11 @@ timestamp = time.strftime("%Y%m%d-%H%M")
 
 instIP = ''
 keyName = 'new_web_server_key'
-resourceURL = 's3://web-server-bucket-' + timestamp + '/resource-' + timestamp + '.jpg'
+bucketName = 'web-server-bucket-' + timestamp
+resourceName = 'resource-' + timestamp + '.jpg'
+resourceS3URL = 's3://web-server-bucket-' + timestamp + '/resource-' + timestamp + '.jpg'
+userName = 'ec2-user'
+
 
 # Set Url var to argument from command else
 try:
@@ -78,16 +82,16 @@ checkConnectionToResource('http://google.com/')
 
 # Call bucket handler to create new Bucket
 checkConnectionToResource(resourceURL)
-createBucket('web-server-bucket-' + timestamp)
+createBucket(bucketName)
 print(colored('Pulling image down from : ' + resourceURL, 'cyan'))
-pullImageFromURL(resourceURL, 'resource-'+ timestamp + '.jpg')
+pullImageFromURL(resourceURL, resourceName)
 print(colored('Putting image to Bucket', 'cyan'))
 
 # wait for bucket to setup, avoid putting to non-existent bucket
 time.sleep(10)
 
-putImageToBucket('web-server-bucket-' + timestamp,
-                 'resource-' + timestamp + '.jpg')
+putImageToBucket(bucketName,
+                 resourceName)
 
 
 # Call instance handler to create new instance and run http server
@@ -98,6 +102,8 @@ for i in instance_handler.ec2.instances.all():
     instIP = str(instList[-1])
     print(instIP)
 
-waitForResource('http://'+instIP)
+instanceHTTP = 'http://'+instIP
+
+waitForResource(instanceHTTP)
 print(colored('running ssh connection','blue'))
-ssh_handler.startSSHConnection('ec2-user',instIP,resourceURL,'new_web_server_key.pem' )
+ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem' )
