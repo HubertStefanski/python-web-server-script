@@ -2,19 +2,17 @@
 # Python 3 AWS api
 import boto3
 
-# HTTP request handler
-import requests
-
-# regular expression operations
-import re
-
 # library to accept command line arguments
 import sys
 
-# Import instance, bucket and ssh handlers
+# Import for feedback highlighting
+from termcolor import colored
+
+# Import handlers
 import instance_handler
 from bucket_handler import *
 import ssh_handler
+from network_probe_handler import *
 
 # Import for feedback highlighting
 from termcolor import colored
@@ -41,43 +39,7 @@ try:
 except IndexError:
     print(colored('resource not found, setting to default image', 'red'))
     resourceURL = "http://www.infinitecat.com/archive18/cute18/finger-on-cat-nose.jpg"
-
-# Perform internet connectivity check
-
-
-def checkConnectionToResource(url):
-    reqUrl = url
-
-    def sendRequest(reqUrl, timeout=20):
-        try:
-            _ = requests.get(reqUrl, timeout=timeout)
-            return True
-        except requests.ConnectionError:
-            return False
-
-    if(sendRequest(url) == True):
-        print(colored('Internet connection to: ' + url + ' is up', 'green'))
-
-    if(sendRequest(url) == False):
-        print(colored('Internet connection to : ' + url +
-                      ' is down Ensure Internet connectivity', 'red', attrs=['bold']))
-        print(colored('Quiting System', 'magenta'))
-        sys.exit(0)
-
-def WaitForConnection(url):
-    reqUrl = url
-    def sendRequest(reqUrl, timeout=5):
-        try:
-            _ = requests.get(reqUrl, timeout=timeout)
-            return True
-        except requests.ConnectionError:
-            return False
-    if(sendRequest(reqUrl) == False):
-        print(colored('Waiting for resource to become available','magenta'))
-        time.sleep(5)
-        WaitForConnection(url)
-    if(sendRequest(reqUrl) == True):
-        print(colored('Connection to resource gained','green'))
+ 
 
 # Check Internet connection
 checkConnectionToResource('http://google.com/')
@@ -96,7 +58,6 @@ putImageToBucket(bucketName,resourceName,None)
 instance_handler.createEC2Instance()
 for i in instance_handler.ec2.instances.all():
     instList = [i.public_ip_address]
-    # instanceIP = instList[-1]
     instIP = str(instList[-1])
     print(instIP)
 
