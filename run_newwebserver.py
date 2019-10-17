@@ -103,10 +103,16 @@ for i in instance_handler.ec2.instances.all():
 instanceHTTP = 'http://'+instIP
 
 WaitForConnection(instanceHTTP)
-print(colored('running ssh connection','blue'))
+checkConnectionToResource(resourceS3URL)
+print(colored('running ssh connection to setup index','blue'))
 ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem','''
         sudo touch /var/www/html/index.html
         sudo chown ec2-user /var/www/html/index.html
         sudo echo '<img src ="''' + resourceS3URL + '''" alt = "resourcePicture">' >> /var/www/html/index.html
+        exit
+        ''' )
+print(colored('running ssh connection to retrieve meta-data','blue'))
+ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem','''
+        sudo curl http://169.254.169.254/latest/meta-data/public-hostname >> /var/www/html/index.html
         exit
         ''' )
