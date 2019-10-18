@@ -55,7 +55,7 @@ def bucketExists():
 # If buckets exists then use most recent bucket in the collection of buckets and 
 # return the bucket name to variable so that file can be uploaded
 # prevents waste of resources by reusing existing buckets
-# if bucketExists() returns as false then create a new bucket and use the name as provided
+# if bucketExists() returns as false then    create a new bucket and use the name as provided
 def chooseBucketOrCreateIfNoneExist(bucketName):
     bucketList = []
     if (bucketExists() == True):

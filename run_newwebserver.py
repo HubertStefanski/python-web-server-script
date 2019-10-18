@@ -11,6 +11,7 @@ from termcolor import colored
 # Import handlers
 import instance_handler
 from bucket_handler import *
+from metric_handler import *
 import ssh_handler
 from network_probe_handler import *
 
@@ -24,13 +25,40 @@ import time
 timestamp = time.strftime("%Y%m%d-%H%M")
 
 # Variables
-
+# Create inst vars
+amiId ='ami-0ce71448843cb18a1' #  CHANGE TO MOST UP TO DATE WHEN USING
+secGroup =['sg-03057cb040ad8642c'] # CHANGE TO OWN SECURITY GROUP
+instType = 't2.micro'
+keyName = 'new_web_server_key' # CHANGE TO PATH OF USER KEY
+usrData = """
+             #!/bin/bash                  
+             sudo yum update -y
+             sudo yum install httpd -y
+             sudo systemctl enable httpd
+             sudo service httpd start
+             """
+# Bucket and S3 Vars
 instIP = ''
-keyName = 'new_web_server_key'
+instID = ''
 bucketName = 'web-server-bucket-' + timestamp
 resourceName = 'resource-' + timestamp + '.jpg'
 resourceS3URL = 'https://s3-eu-west-1.amazonaws.com/'+ bucketName +'/'+ resourceName
+
+# SSH Commands and params
 userName = 'ec2-user'
+getMetaDataCMD = '''
+        curl http://169.254.169.254/latest/meta-data >> /var/www/index.html
+        exit'''
+getAmiIDCMD = '''
+        sudo curl http://169.254.169.254/latest/meta-data/public-hostname >> /var/www/html/index.html
+        exit
+        ''' 
+setImginIndex = '''
+        sudo touch /var/www/html/index.html
+        sudo chown ec2-user /var/www/html/index.html
+        sudo echo '<img src ="''' + resourceS3URL + '''" alt = "resourcePicture">' >> /var/www/html/index.html
+        exit
+        '''
 
 
 # Set Url var to argument from command else
@@ -55,25 +83,34 @@ putImageToBucket(bucketName,resourceName,None)
 
 
 # Call instance handler to create new instance and run http server
-instance_handler.createEC2Instance()
+instance_handler.createEC2Instance(amiId,secGroup,instType,keyName,usrData)
+
+# retrieve  instance information for vars
 for i in instance_handler.ec2.instances.all():
     instList = [i.public_ip_address]
     instIP = str(instList[-1])
-    print(instIP)
+    print(instIP)                       # Remove this after testing
 
+
+for i in instance_handler.ec2.instances.all():
+    instList = [i.id]
+    instID = str(instList[-1])
+    print(instID)                       # Remove this after testing
+# Provide var with HTTP prefix
+
+# retrieveInstIP()
+# retrieveInstID()
 instanceHTTP = 'http://'+instIP
 
-WaitForConnection(instanceHTTP)
+WaitForConnection(instanceHTTP)     #Wait until instance HTTP is accessible
+
 checkConnectionToResource(resourceS3URL)
+# Run ssh commands to Instance
 print(colored('running ssh connection to setup index','blue'))
-ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem','''
-        sudo touch /var/www/html/index.html
-        sudo chown ec2-user /var/www/html/index.html
-        sudo echo '<img src ="''' + resourceS3URL + '''" alt = "resourcePicture">' >> /var/www/html/index.html
-        exit
-        ''' )
+ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem',setImginIndex)
+
 print(colored('running ssh connection to retrieve meta-data','blue'))
-ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem','''
-        sudo curl http://169.254.169.254/latest/meta-data/public-hostname >> /var/www/html/index.html
-        exit
-        ''' )
+ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem',getAmiIDCMD)
+
+print(colored('running metric handler on instance ID : ' + instID,'magenta'))
+startCloudWatchMonitor(instID)

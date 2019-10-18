@@ -7,24 +7,27 @@ from termcolor import colored
 ec2 = boto3.resource('ec2', region_name='eu-west-1')
 
 
-
-def createEC2Instance():
+# Create new Ec2 instance 
+def createEC2Instance(amiID,secGroup,instType,keyName,usrData):
     instance = ec2.create_instances(
-        ImageId='ami-0ce71448843cb18a1',
+        ImageId=amiID, #most up-to-date AMI
         MinCount=1,
         MaxCount=1,
         # group ID with SSH and HTTP access rules in place
-        SecurityGroupIds=['sg-03057cb040ad8642c'],
-        InstanceType='t2.micro',
-        KeyName='new_web_server_key',
+        SecurityGroupIds=secGroup,
+        InstanceType=instType,
+        KeyName=keyName,
         # launch HTTP service to allow access through web browser
-        UserData="""
-             #!/bin/bash                  
-             sudo yum update -y
-             sudo yum install httpd -y
-             sudo systemctl enable httpd
-             sudo service httpd start
-             """
+        UserData=usrData,
+        # TODO
+        # TagSpecifications = [
+        #     {
+        #         'ResourceType' : 'dedicated-host'
+        #         'tags' : [
+
+        #         ]
+        #     }
+        #]
     )
     # give the user feedback creation
     print(colored(">>>Waiting for instance to Launch, this may take a while",
