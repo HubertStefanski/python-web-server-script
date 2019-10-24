@@ -35,8 +35,8 @@ def putImageToBucket(bucketName,fileName,object_name = None):
 
 # Retun the URL of newly uploaded file  
 def getResourceBucketURL(timestamp):
-    print(colored('s3://web-server-bucket-'+ timestamp +'/resource-' + timestamp +'.jpg','red',attrs=['bold']))
-    return 's3://web-server-bucket-'+ timestamp +'/resource-' + timestamp +'.jpg'
+    print(colored(f's3://web-server-bucket-{timestamp}/resource-{timestamp}.jpg','red',attrs=['bold']))
+    return f's3://web-server-bucket{timestamp}/resource-{timestamp}.jpg'
 
 # TODO
 # Check for existing buckets apart from user default bucket provided by rossettaHub

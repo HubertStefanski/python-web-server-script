@@ -37,12 +37,17 @@ usrData = """
              sudo systemctl enable httpd
              sudo service httpd start
              """
+instTags = [
+                    {'Key':'project','Value': 'foo'},
+                    {'Key': 'owner', 'Value': 'walter'},
+        ]             
+
 # Bucket and S3 Vars
 instIP = ''
 instID = ''
-bucketName = 'web-server-bucket-' + timestamp
-resourceName = 'resource-' + timestamp + '.jpg'
-resourceS3URL = 'https://s3-eu-west-1.amazonaws.com/'+ bucketName +'/'+ resourceName
+bucketName = f'web-server-bucket-{timestamp}'
+resourceName = f'resource-{timestamp}.jpg'
+resourceS3URL = f'https://s3-eu-west-1.amazonaws.com/{bucketName}/{resourceName}'
 
 # SSH Commands and params
 userName = 'ec2-user'
@@ -53,10 +58,10 @@ getAmiIDCMD = '''
         sudo curl http://169.254.169.254/latest/meta-data/public-hostname >> /var/www/html/index.html
         exit
         ''' 
-setImginIndex = '''
+setImginIndex = f'''
         sudo touch /var/www/html/index.html
         sudo chown ec2-user /var/www/html/index.html
-        sudo echo '<img src ="''' + resourceS3URL + '''" alt = "resourcePicture">' >> /var/www/html/index.html
+        sudo echo '<img src = {resourceS3URL} alt = "resourcePicture">' >> /var/www/html/index.html
         exit
         '''
 
@@ -75,9 +80,9 @@ checkConnectionToResource('http://google.com/')
 # Call bucket handler to create new Bucket
 checkConnectionToResource(resourceURL)
 createBucket(bucketName)
-print(colored('Pulling image down from : ' + resourceURL, 'cyan'))
+print(colored(f'Pulling image down from : {resourceURL}', 'cyan'))
 pullImageFromURL(resourceURL, resourceName)
-print(colored('Putting image to Bucket : ' + bucketName, 'cyan'))
+print(colored(f'Putting image to Bucket : {bucketName}','cyan'))
 
 putImageToBucket(bucketName,resourceName,None)
 
@@ -89,28 +94,33 @@ instance_handler.createEC2Instance(amiId,secGroup,instType,keyName,usrData)
 for i in instance_handler.ec2.instances.all():
     instList = [i.public_ip_address]
     instIP = str(instList[-1])
-    print(instIP)                       # Remove this after testing
+   # print(instIP)                       # used for debugging
 
 
 for i in instance_handler.ec2.instances.all():
     instList = [i.id]
     instID = str(instList[-1])
-    print(instID)                       # Remove this after testing
+   # print(instID)                       # used for debugging
+
 # Provide var with HTTP prefix
+instanceHTTP = f'http://{instIP}'
 
-# retrieveInstIP()
-# retrieveInstID()
-instanceHTTP = 'http://'+instIP
 
-WaitForConnection(instanceHTTP)     #Wait until instance HTTP is accessible
-
-checkConnectionToResource(resourceS3URL)
+waitForConnection(instanceHTTP)     #Wait until instance HTTP is accessible
 # Run ssh commands to Instance
-print(colored('running ssh connection to setup index','blue'))
+print(colored('Running ssh connection to setup index','blue'))
 ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem',setImginIndex)
 
-print(colored('running ssh connection to retrieve meta-data','blue'))
+print(colored('Running ssh connection to retrieve meta-data','blue'))
 ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem',getAmiIDCMD)
 
-print(colored('running metric handler on instance ID : ' + instID,'magenta'))
-startCloudWatchMonitor(instID)
+print(colored(f'Running metric handler on instance ID : {instID}','magenta'))
+response  = startCloudWatchMonitorCPU(instID)
+
+def waitForResponse(response):
+    while(response == None):
+        time.sleep(2)
+    else:
+        print(response)
+waitForResponse(response)
+

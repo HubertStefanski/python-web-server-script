@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+#Import system module
+import sys
+
 # HTTP request handler
 import requests
 
@@ -13,7 +16,8 @@ from termcolor import colored
 import time
 
 
-def sendRequest(reqUrl, timeout=20):
+
+def sendRequest(reqUrl, timeout = 20):
     # send get request to specified url, allow for 20 seconds of timeout (Account for slower connections) 
     try:
         _ = requests.get(reqUrl, timeout=timeout)
@@ -26,20 +30,40 @@ def sendRequest(reqUrl, timeout=20):
 # Return False and quit system if connection is down
 def checkConnectionToResource(url):
     if(sendRequest(url) == True):
-        print(colored('Internet connection to: ' + url + ' is up', 'green'))
-
-    if(sendRequest(url) == False):
-        print(colored('Internet connection to : ' + url +
-                      ' is down Ensure Internet connectivity', 'red', attrs=['bold']))
+        print(colored(f'Internet connection to: {url} is up', 'green'))
+    else:
+        print(colored(f'Internet connection to : {url} is down Ensure Internet connectivity', 'red', attrs=['bold']))
         print(colored('Quiting System', 'magenta'))
         sys.exit(0)
+attemptCounter = 1
 
 # Perform internet connectivity check trough get request and wait until connection is up, sleep if false for set time
-def WaitForConnection(url):
-
-    if(sendRequest(url) == False):
-        print(colored('Waiting for resource to become available','magenta'))
-        time.sleep(5)
-        WaitForConnection(url)
-    if(sendRequest(url) == True):
-        print(colored('Connection to resource gained','green'))
+def waitForConnection(url):
+    url = url
+    def userConfirmContinueAttempts():
+        global attemptCounter
+        contQuestion = input('Attempt counter exceeded set limit for attempts, continue? (y/n)')
+        if(contQuestion.upper() == 'Y'):
+            attemptCounter = 0
+            waitForConnection(url)
+        elif(contQuestion.upper() == 'N'):
+            print(colored('exiting system','magenta'))
+            sys.exit(0)
+        else:   
+            print(colored("Sorry,that didn't work,try again",'red'))
+            userConfirmContinueAttempts()
+    
+    def checkRequest(url):
+        global attemptCounter
+        if(sendRequest(url) == False):
+            print(colored('Waiting for resource to become available','magenta'))
+            time.sleep(5)
+            attemptCounter += 1
+            if(attemptCounter >= 5):
+                userConfirmContinueAttempts()
+                attemptCounter = 0
+            else:
+                waitForConnection(url)
+        if(sendRequest(url) == True):
+            print(colored('Connection to resource gained','green'))
+    checkRequest(url)

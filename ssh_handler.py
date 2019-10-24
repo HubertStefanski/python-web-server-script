@@ -16,7 +16,7 @@ def startSSHConnection(username,instanceIP, resourceName,keyName,commandIssued):
         stdin = ssh.makefile('wb')
         stdout = ssh.makefile('rb')
         stdin.write(commandIssued) # write to stdin the command/s passed trough params
-        print(stdout.read())
+       # print(stdout.read()) # Use for debugging
         stdout.close()
         stdin.close()
     except Exception as err:
