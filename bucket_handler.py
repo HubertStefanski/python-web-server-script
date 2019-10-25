@@ -3,6 +3,7 @@ import sys
 import boto3
 from termcolor import colored
 import requests
+import os
 from botocore.exceptions import ClientError
 #from urllib3.request import urlretrieve
 s3 = boto3.resource('s3')
@@ -28,10 +29,11 @@ def putImageToBucket(bucketName,fileName,object_name = None):
         object_name = fileName #name the object same as filename
     try:
         s3client.upload_file(fileName,bucketName,object_name,ExtraArgs={'ACL':'public-read'}) # give access for public to read file (neccessary for accessing without key)
+        return True
     except ClientError as e:
         logging.error(e)
         return False
-    return True
+    
 
 # Retun the URL of newly uploaded file  
 def getResourceBucketURL(timestamp):

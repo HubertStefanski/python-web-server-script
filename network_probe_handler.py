@@ -17,6 +17,7 @@ import time
 
 
 
+
 def sendRequest(reqUrl, timeout = 20):
     # send get request to specified url, allow for 20 seconds of timeout (Account for slower connections) 
     try:
@@ -39,7 +40,7 @@ attemptCounter = 1
 
 # Perform internet connectivity check trough get request and wait until connection is up, sleep if false for set time
 def waitForConnection(url):
-    url = url
+   
     def userConfirmContinueAttempts():
         global attemptCounter
         contQuestion = input('Attempt counter exceeded set limit for attempts, continue? (y/n)')
@@ -47,7 +48,7 @@ def waitForConnection(url):
             attemptCounter = 0
             waitForConnection(url)
         elif(contQuestion.upper() == 'N'):
-            print(colored('exiting system','magenta'))
+            print(colored('Quiting system','magenta'))
             sys.exit(0)
         else:   
             print(colored("Sorry,that didn't work,try again",'red'))
@@ -56,14 +57,13 @@ def waitForConnection(url):
     def checkRequest(url):
         global attemptCounter
         if(sendRequest(url) == False):
-            print(colored('Waiting for resource to become available','magenta'))
             time.sleep(5)
             attemptCounter += 1
-            if(attemptCounter >= 5):
+            if(attemptCounter >= 15):
                 userConfirmContinueAttempts()
                 attemptCounter = 0
             else:
                 waitForConnection(url)
-        if(sendRequest(url) == True):
+        elif(sendRequest(url) == True):
             print(colored('Connection to resource gained','green'))
     checkRequest(url)

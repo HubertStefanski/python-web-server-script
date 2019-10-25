@@ -24,6 +24,7 @@ import time
 # Create a timestamp to give UID to each component
 timestamp = time.strftime("%Y%m%d-%H%M")
 
+metricList = ['CPUUtilization','NetworkIn','NetworkOut']
 # Variables
 # Create inst vars
 amiId ='ami-0ce71448843cb18a1' #  CHANGE TO MOST UP TO DATE WHEN USING
@@ -52,16 +53,16 @@ resourceS3URL = f'https://s3-eu-west-1.amazonaws.com/{bucketName}/{resourceName}
 # SSH Commands and params
 userName = 'ec2-user'
 getMetaDataCMD = '''
-        curl http://169.254.169.254/latest/meta-data >> /var/www/index.html
+        curl http://169.254.169.254/latest/meta-data >> /var/www/html/index.html
         exit'''
 getAmiIDCMD = '''
         sudo curl http://169.254.169.254/latest/meta-data/public-hostname >> /var/www/html/index.html
         exit
         ''' 
-setImginIndex = f'''
+setImginIndex = '''
         sudo touch /var/www/html/index.html
         sudo chown ec2-user /var/www/html/index.html
-        sudo echo '<img src = {resourceS3URL} alt = "resourcePicture">' >> /var/www/html/index.html
+        sudo echo '<img src = ''' + resourceS3URL + ''' alt = "resourcePicture">' >> /var/www/html/index.html
         exit
         '''
 
@@ -85,7 +86,9 @@ pullImageFromURL(resourceURL, resourceName)
 print(colored(f'Putting image to Bucket : {bucketName}','cyan'))
 
 putImageToBucket(bucketName,resourceName,None)
+os.system('sudo rm *.jpg')
 
+    
 
 # Call instance handler to create new instance and run http server
 instance_handler.createEC2Instance(amiId,secGroup,instType,keyName,usrData)
@@ -104,23 +107,24 @@ for i in instance_handler.ec2.instances.all():
 
 # Provide var with HTTP prefix
 instanceHTTP = f'http://{instIP}'
+print(colored(f'Waiting for resource {instanceHTTP} to become available','magenta',attrs=['blink']))
 
 
 waitForConnection(instanceHTTP)     #Wait until instance HTTP is accessible
 # Run ssh commands to Instance
 print(colored('Running ssh connection to setup index','blue'))
-ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem',setImginIndex)
+ssh_handler.startSSHConnection(userName,instIP,'new_web_server_key.pem',setImginIndex)
 
 print(colored('Running ssh connection to retrieve meta-data','blue'))
-ssh_handler.startSSHConnection(userName,instIP,resourceS3URL,'new_web_server_key.pem',getAmiIDCMD)
+ssh_handler.startSSHConnection(userName,instIP,'new_web_server_key.pem',getAmiIDCMD)
 
-print(colored(f'Running metric handler on instance ID : {instID}','magenta'))
-response  = startCloudWatchMonitorCPU(instID)
+time.sleep(120)
+def getMetrics(instID,metricList):
+    for metricName in metricList :
+        response  = startCloudWatchMonitor(instID,metricName)
+        while(response == None):
+            time.sleep(1)
+        else:
+            print(colored(response,'yellow'))
 
-def waitForResponse(response):
-    while(response == None):
-        time.sleep(2)
-    else:
-        print(response)
-waitForResponse(response)
-
+getMetrics(instID,metricList)

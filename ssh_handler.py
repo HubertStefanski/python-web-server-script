@@ -6,7 +6,7 @@ import paramiko
 
 
 # Connect to specified ip using params through ssh and execute provided code 
-def startSSHConnection(username,instanceIP, resourceName,keyName,commandIssued):
+def startSSHConnection(username,instanceIP,keyName,commandIssued):
     ssh = paramiko.SSHClient()
     try:
         ssh.load_system_host_keys()
@@ -16,7 +16,7 @@ def startSSHConnection(username,instanceIP, resourceName,keyName,commandIssued):
         stdin = ssh.makefile('wb')
         stdout = ssh.makefile('rb')
         stdin.write(commandIssued) # write to stdin the command/s passed trough params
-       # print(stdout.read()) # Use for debugging
+        print(stdout.read()) # Use for debugging
         stdout.close()
         stdin.close()
     except Exception as err:
