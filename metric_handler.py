@@ -24,7 +24,7 @@ def startCloudWatchMonitor(instID,metricName):
                                         EndTime=datetime.now() - timedelta(minutes=60),       # now
                                         Period=300,                                           # 5 minute intervals
                                         Statistics=['Average'])
-        print(f"Average {metricName} utilisation:", response['Datapoints'][0]['Average'])
+        print(f"Average {metricName} utilisation (in % or Bytes):", response['Datapoints'][0]['Average'])
         return response
         print (colored(response,'yellow'))
 

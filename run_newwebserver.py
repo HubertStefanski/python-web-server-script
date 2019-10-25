@@ -118,6 +118,7 @@ ssh_handler.startSSHConnection(userName,instIP,'new_web_server_key.pem',setImgin
 print(colored('Running ssh connection to retrieve meta-data','blue'))
 ssh_handler.startSSHConnection(userName,instIP,'new_web_server_key.pem',getAmiIDCMD)
 
+print(colored('Running cloudwatch monitor, waiting for data to become available','magenta'))
 time.sleep(120)
 def getMetrics(instID,metricList):
     for metricName in metricList :
