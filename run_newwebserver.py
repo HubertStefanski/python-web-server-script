@@ -27,7 +27,7 @@ timestamp = time.strftime("%Y%m%d-%H%M")
 metricList = ['CPUUtilization','NetworkIn','NetworkOut']
 # Variables
 # Create inst vars
-amiId ='ami-0ce71448843cb18a1' #  CHANGE TO MOST UP TO DATE WHEN USING
+amiId ='ami-040ba9174949f6de4' #  CHANGE TO MOST UP TO DATE WHEN USING
 secGroup =['sg-03057cb040ad8642c'] # CHANGE TO OWN SECURITY GROUP
 instType = 't2.micro'
 keyName = 'new_web_server_key' # CHANGE TO PATH OF USER KEY
@@ -129,3 +129,4 @@ def getMetrics(instID,metricList):
             print(colored(response,'yellow'))
 
 getMetrics(instID,metricList)
+    

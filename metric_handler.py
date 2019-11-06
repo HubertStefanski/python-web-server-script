@@ -20,8 +20,8 @@ def startCloudWatchMonitor(instID,metricName):
                                             Dimensions=[{'Name':'InstanceId', 'Value': instID}])
 
     for metric in metric_iterator:
-        response = metric.get_statistics(StartTime=datetime.now() - timedelta(minutes=65),     # 5 minutes ago
-                                        EndTime=datetime.now() - timedelta(minutes=60),       # now
+        response = metric.get_statistics(StartTime=datetime.now() - timedelta(minutes=5),     # 5 minutes ago
+                                        EndTime=datetime.now() - timedelta(minutes=0),       # now
                                         Period=300,                                           # 5 minute intervals
                                         Statistics=['Average'])
         print(f"Average {metricName} utilisation (in % or Bytes):", response['Datapoints'][0]['Average'])
